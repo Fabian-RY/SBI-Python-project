@@ -23,7 +23,8 @@ AA = {'ALA':'A', 'ARG':'R', 'ASN':'N', 'ASP':'D',
       'CYS':'C', 'GLN':'Q', 'GLU':'E', 'GLY':'G',
       'HIS':'H','ILE':'I','LEU':'L','LYS':'K',
       'MET':'M', 'PHE':'F','PRO':'P','SER':'S',
-      'THR':'T', 'TRP':'Y','VAL':'V','TERM':''}
+      'THR':'T', 'TRP':'Y','VAL':'V','TERM':'',
+      ' DA':'A',' DG':' G', ' DC':'C', ' DT':'T'}
 
 def _parse_args():
     '''
@@ -50,7 +51,7 @@ if(__name__ == '__main__'):
     arguments = _parse_args()
     if(os.path.isfile(arguments.input)):  # If the input is a file, tries to read it
         pdb_file = arguments.input
-        PDBparser = PDB.PDBParser()
+        PDBparser = PDB.PDBParser(QUIET=True)
         structure = PDBparser.get_structure(pdb_file[:-3], pdb_file) # Parses the PDB
         io = PDB.PDBIO()
         if(os.path.exists(arguments.output) and os.path.isfile(arguments.output)): #Checks the output is correct and either doesn't exists or it's a folder
@@ -60,7 +61,7 @@ if(__name__ == '__main__'):
             os.mkdir(arguments.output)
         # For each chain save it in a separate file. Log is provided for very long proteins
         for chain in structure.get_chains():
-            splitted = PDB.Structure.Structure(pdb_file[:-3]+chain.id)    
+            splitted = PDB.Structure.Structure(pdb_file[:-3]+chain.id)
             splitted.add(chain)
             io.set_structure(chain)
             print('Saving chain {chain_id} in {prefix}_{chain_id}.pdb'.format(prefix=arguments.prefix, chain_id=chain.id))
@@ -71,7 +72,8 @@ if(__name__ == '__main__'):
                 fhand = open(filename, 'w')
                 fhand.write('>{prefix}_{chain_id}\n'.format(prefix=arguments.prefix, chain_id=chain.id))
                 for residue in chain:
-                    fhand.write(AA.get(residue.resname, ''))
+                    fhand.write(AA.get(residue.resname, '').replace(' ',''))
+                fhand.write('\n')
                 fhand.close()
             filename = os.path.join(arguments.output, '{prefix}_{chain_id}.pdb'.format(prefix=arguments.prefix, chain_id=chain.id))
             io.save(filename)

@@ -12,4 +12,5 @@ setup(name='',
       version='0.1',
       description='A macromolecular complex builder',
       author='Fabián & Claudio',
-      packages='Biopython')
+      packages='Biopython',
+      url='https://github.com/Fabian-RY/SBI-Python-project')
