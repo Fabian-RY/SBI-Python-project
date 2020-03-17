@@ -8,9 +8,10 @@ Created on Wed Mar  4 10:32:34 2020
 
 from distutils.core import setup
 
-setup(name='',
+setup(name='pro-mod-FC',
       version='0.1',
       description='A macromolecular complex builder',
       author='Fabián & Claudio',
-      packages='Biopython',
+      packages=['builder'],
+      scripts=['main.py', 'scripts/pairpdbs.py', 'scripts/pdbsplit.py'],
       url='https://github.com/Fabian-RY/SBI-Python-project')

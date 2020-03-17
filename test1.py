@@ -4,7 +4,7 @@
 Created on Tue Mar 10 10:08:28 2020
 
 @author: fabian
-"""
+""" 
 
 import unittest
 import re
@@ -33,8 +33,8 @@ class test(unittest.TestCase):
         structure = parser.get_structure('good','examples/3e0d.pdb')
         print(len(list(structure.get_chains())))
         structures = list()
-        path = 'examples/5ara/pairs'
-        fasta = 'examples/5ara/5ara.fa'
+        path = 'examples/3e0d/pairs'
+        fasta = '3e0d.fa'
         for file in os.listdir(path):
             if(not os.path.isfile(os.path.join(path, file))): continue
             if(not file.endswith('.pdb')): continue

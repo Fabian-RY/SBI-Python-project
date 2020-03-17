@@ -81,7 +81,7 @@ def build_complex(threshold, repeated_limit, structures, sequences):
             for chain in atoms_of_chains:
                 for atom in atoms_of_chains:
                     for atom in chain.get_atoms():
-                        close_atoms = neighbor.search(atom.get_coord(), 3)
+                        close_atoms = neighbor.search(atom.get_coord(), 1)
                         # If there are atoms within 2 angstroms, consider a clash
                         if len(close_atoms) > 0:
                             clashes += 1
