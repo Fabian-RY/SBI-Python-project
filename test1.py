@@ -41,7 +41,13 @@ class test(unittest.TestCase):
             path_file = os.path.join(path, file)
             pdb = parser.get_structure(path_file[:-3], path_file)
             structures.append(pdb)
-        bm.build_complex(0.9, 10, structures=structures, sequences=list(SeqIO.parse(fasta, 'fasta')))
+        threshold=0.9
+        distance=1
+        stoichiometry=''
+        bm.build_complex(threshold, distance, stoichiometry, 
+                         structures=structures, 
+                         sequences=list(SeqIO.parse(fasta, 'fasta')), 
+                         verbose=False)
         pass
     
 if __name__ == '__main__':

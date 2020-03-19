@@ -62,18 +62,20 @@ class Ensemble():
         '''
             Superimpose two complexes given 
         '''
-        #print(list(self.structure_A.get_chains()), list(self.structure_B.get_chains()))
+        print(list(self.structure_A.get_chains()), list(self.structure_B.get_chains()))
         chain_A = next(filter(lambda x: x.id == chain_A, self.structure_A.get_chains()))
         chain_B = next(filter(lambda x: x.id == chain_B, self.structure_B.get_chains()))
-        chain_atoms = list(chain_A.get_atoms())
         moving_chains = copy.copy(self.structure_B)
         model = next(moving_chains.get_models())
-        model.detach_child(chain_B.id)
         moving_chains = model.get_chains()
         superimposed_atoms = list(chain_B.get_atoms())
+        chain_atoms = list(chain_A.get_atoms())
+        print(self.structure_A.id, self.structure_B.id)
+        print(len(chain_atoms), len(superimposed_atoms))
         self.superimposer.set_atoms(chain_atoms, superimposed_atoms)
         chains_changed = list()
         for chain in moving_chains:
+            if chain.id == chain_B.id: continue
             atoms = chain.get_atoms()
             self.superimposer.apply(atoms)
             chains_changed.append(chain)

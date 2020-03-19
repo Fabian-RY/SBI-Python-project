@@ -14,4 +14,5 @@ setup(name='pro-mod-FC',
       author='Fabián & Claudio',
       packages=['builder'],
       scripts=['main.py', 'scripts/pairpdbs.py', 'scripts/pdbsplit.py'],
+      install_requieres = ['Biopython'],
       url='https://github.com/Fabian-RY/SBI-Python-project')
