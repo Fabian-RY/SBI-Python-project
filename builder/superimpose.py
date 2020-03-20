@@ -56,13 +56,12 @@ class Ensemble():
                 aligned_pair = pairwise2.align.globalxx(seq1, seq2)
                 max_score = max(aligned_pair, key=lambda x: x[2])
                 alignments.append(((chain_A, chain_B), max_score[2]/len(max_score[0])))
-        return max(alignments, key=lambda x: x[1])
+        return alignments
     
     def superimpose(self, chain_A, chain_B):
         '''
             Superimpose two complexes given 
         '''
-        print(list(self.structure_A.get_chains()), list(self.structure_B.get_chains()))
         chain_A = next(filter(lambda x: x.id == chain_A, self.structure_A.get_chains()))
         chain_B = next(filter(lambda x: x.id == chain_B, self.structure_B.get_chains()))
         moving_chains = copy.copy(self.structure_B)
@@ -70,8 +69,11 @@ class Ensemble():
         moving_chains = model.get_chains()
         superimposed_atoms = list(chain_B.get_atoms())
         chain_atoms = list(chain_A.get_atoms())
-        print(self.structure_A.id, self.structure_B.id)
-        print(len(chain_atoms), len(superimposed_atoms))
+        # Mejorable si usamos el alineamiento
+        if (len(list(chain_A.get_atoms())) != len(list(chain_B.get_atoms()))):
+            length = min(len(list(chain_A)), len(list(chain_B)))
+            chain_atoms = chain_atoms[:length]
+            superimposed_atoms = superimposed_atoms[:length]
         self.superimposer.set_atoms(chain_atoms, superimposed_atoms)
         chains_changed = list()
         for chain in moving_chains:
@@ -85,11 +87,7 @@ class Ensemble():
     @property
     def chains(self):
         return self.structure_A, self.structure_B
-    
-    @property
-    def fastas(self):
-        return self.fasta_1, self.fasta_2
-    
+       
     @property
     def rms(self):
         '''

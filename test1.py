@@ -30,11 +30,11 @@ class test(unittest.TestCase):
            
     def test_recursive(self):
         parser = PDB.PDBParser(QUIET=1)  
-        structure = parser.get_structure('good','examples/3e0d.pdb')
+        structure = parser.get_structure('good','examples/5nss.pdb')
         print(len(list(structure.get_chains())))
         structures = list()
-        path = 'examples/3e0d/pairs'
-        fasta = '3e0d.fa'
+        path = 'examples/5nss/pairs'
+        fasta = '5nss.fa'
         for file in os.listdir(path):
             if(not os.path.isfile(os.path.join(path, file))): continue
             if(not file.endswith('.pdb')): continue
@@ -44,10 +44,13 @@ class test(unittest.TestCase):
         threshold=0.9
         distance=1
         stoichiometry=''
-        bm.build_complex(threshold, distance, stoichiometry, 
+        model = bm.build_complex(threshold, distance, stoichiometry, 
                          structures=structures, 
                          sequences=list(SeqIO.parse(fasta, 'fasta')), 
                          verbose=False)
+        io = PDB.PDBIO()
+        io.set_structure(model)
+        io.save('final_model.pdb')
         pass
     
 if __name__ == '__main__':

@@ -9,12 +9,18 @@ Created on Tue Feb 25 19:39:13 2020
 
 """
 
-from . import superimpose
-from .superimpose import Ensemble
-
-import copy
+from superimpose import Ensemble
 
 from Bio import PDB
+from Bio import pairwise2
+
+AA_EQUIVALENCE = {'ALA':'A', 'ARG':'R', 'ASN':'N', 'ASP':'D',
+      'CYS':'C', 'GLN':'Q', 'GLU':'E', 'GLY':'G',
+      'HIS':'H','ILE':'I','LEU':'L','LYS':'K',
+      'MET':'M', 'PHE':'F','PRO':'P','SER':'S',
+      'THR':'T', 'TRP':'Y','VAL':'V', 'TYR':'Y','TERM':'',
+      'UNK':'X','DA':'A','DG':'G', 'DC':'C', 
+      'DT':'T','U':'U','A':'A','G':'G', 'C':'C'}
 
 def _get_total_chains(*structures):
     '''
@@ -26,14 +32,29 @@ def _get_total_chains(*structures):
             chains.add(chain.id)
     return chains
 
-def get_fastas_from_structs(structs, fastas):
+def get_fastas_from_structs(structs, fastas, threshold=0.9):
     chain_fasta = {}
     for struct in structs:
         chain_fasta[struct.id] = {}
         for chain in struct.get_chains():
+            chain_sequence = ''
+            for residue in chain.get_residues():
+                residue = residue.resname.lstrip().strip()
+                print(residue, end='')
+                chain_sequence += AA_EQUIVALENCE[residue]
+            #print(chain_sequence)
             for seq in fastas:
-                if chain.id in seq.id:
+                #print(seq.seq)
+                print(chain_sequence, seq.seq)
+                alignment = pairwise2.align.globalxx(chain_sequence, seq.seq, one_alignment_only=True)
+                score = alignment[0][2]/len(alignment[0][0])
+                print(score)
+                if score > threshold:
                     chain_fasta[struct.id][chain.id] = seq
+                    break
+            else:
+                raise Exception('PDB does not correspond to fasta')
+                pass
     return chain_fasta
 
 def build_complex(threshold, distance, stoichiometry, sequences, structures, verbose):
@@ -49,22 +70,21 @@ def build_complex(threshold, distance, stoichiometry, sequences, structures, ver
     current = 0
     done = []
     while True:
-        '''
-        print(1, len(done), len(structures))
-        print(2, failed)
-        print(3, current)
-        '''
-        if(len(done) == len(structures)): break
+        if(len(done) == len(structures)): 
+            print('done')
+            break
         structure = structures[current % len(structures)]
         if(structure.id in done): 
             current += 1
             print('Skiping')
+            print(failed)
             continue # If is already in, continue to the next one
         if verbose:
             print('Chains joined', len(list(full_structure.get_chains()))) 
             print('Pairs left', len(structures))
             print('Current pair:', structure.id)
         count = list(failed.count(element) for element in failed)
+        print(count)
         if 2 in count: # We are repeating structures
             if verbose: print('Some pdbs could not be joined')
             break
@@ -85,13 +105,15 @@ def build_complex(threshold, distance, stoichiometry, sequences, structures, ver
         print('Ensembling')
         pair = Ensemble(full_structure, structure)
         pair_seqs = (seqs[full_structure.id], seqs[structure.id])
-        align = pair.get_best_alignment(pair_seqs)
-        if verbose: print(align[0][0], align[0][1])
+        alignment = pair.get_best_alignment(pair_seqs)
         # If score is > 0.95, they should be homologs
-        print(align)
-        for alignment in align:
+        for align in alignment:
             if(align[1] > threshold):
+                #try:
                 atoms_of_chains = pair.superimpose(align[0][0], align[0][1])
+                #except PDB.PDBExceptions.PDBException:
+                #    current += 1
+                #    continue
                 iters += 1
                 neighbor = PDB.NeighborSearch(list(full_structure.get_atoms()))
                 clashes = 0
@@ -112,16 +134,14 @@ def build_complex(threshold, distance, stoichiometry, sequences, structures, ver
                         chain2.child_list += list(chain.get_residues())
                         model = next(full_structure.get_models())
                         model.child_list.append(chain2)
-                        failed = []
+                    failed = []
                     done.append(structure.id)
-                    print('breaking')
                     break
-                else:
-                    print('Failed')
-                    failed.append(structure.id)
-                    comparisons[structure.id] = comparisons.get(structure.id, 0) +1
-                    # Pdbs clash
-        else: #If there are no good alignments, is count as a failed
+        else:
+            print('Failed')
             failed.append(structure.id)
+            comparisons[structure.id] = comparisons.get(structure.id, 0) +1
+            # Pdbs clash
         current += 1
+        print('Loop')
     return full_structure

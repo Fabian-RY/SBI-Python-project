@@ -60,7 +60,7 @@ def _parse_args():
                         dest='distance',
                         help='Maximun distance to consider that two atoms clash, in Armstrongs. By default, 0.1 armstrong',
                         type=float,
-                        default=0.1)
+                        default=1)
     parser.add_argument('-t','--threshold',
                         action='store',
                         help='Minimum score to consider two sequences homologus, and thus, the same to be build. Default 0.95',
