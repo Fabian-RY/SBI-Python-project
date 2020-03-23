@@ -83,11 +83,13 @@ def _parse_stoichiometry(input_arg):
     '''
     if(not input_arg): return input_arg
     splitted = input_arg.split(';')
+    stoic = {}
     for element in splitted:
-        result = re.search('^([A-Za-Z]+)([0-9]+)$', element)
+        result = re.search('^(.+):([0-9]+)$', element)
         if (not result): 
             raise Exception('Non valid stoichimetry')
-            
+        stoic[result.group(1)] = int(result.group(2))
+    return stoic
 
 if __name__ == '__main__':
     
@@ -98,6 +100,9 @@ if __name__ == '__main__':
     arguments = _parse_args()
     parser = PDB.PDBParser(QUIET=1)  
     structures = list()
+    if(not os.path.exists(arguments.input_folder)):
+        print('Input folder doesn\t exist', file=sys.stderr)
+        sys.exit(1)
     print('Reading PDB files. This may take a while...')
     for file in os.listdir(arguments.input_folder):
         if file.endswith('.pdb'):
@@ -106,7 +111,7 @@ if __name__ == '__main__':
             structures.append(pdb)
     sequences = SeqIO.parse(arguments.fasta, 'fasta')
     stoic = _parse_stoichiometry(arguments.stoichiometry) 
-    
+    print(stoic)
     print('Building complex...')
     #############################################
     #          Build the complex                #
@@ -127,6 +132,8 @@ if __name__ == '__main__':
     print('Saving complex...')
     io = PDB.PDBIO()
     io.set_structure(model)
+    if(not os.path.exists(arguments.output_folder)):
+        os.mkdir(arguments.output_folder)
     io.save(os.path.join(arguments.output_folder, 'final_model.pdb'))
     
     ###############################
@@ -138,6 +145,8 @@ if __name__ == '__main__':
         except ImportError:
             print('Modeller could not be found, so no optimization will be done. Please, install it before using the --optimize option', 
                   file=sys.stderr)
-        else:
+        else: #Optimize
+            from builder import optimize
+            optimize.optimize(os.path.join(arguments.output_folder, 'final_model.pdb'), arguments.output_folder)
             print('Optimizing...')
     print('Model completed')

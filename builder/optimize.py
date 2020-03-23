@@ -22,7 +22,7 @@ from modeller.optimizers import conjugate_gradients, molecular_dynamics, actions
 import os
 
 def optimize(pdb, pdb_path):
-    
+    print(1, pdb_path)
     # Environ data
     env = environ()
     env.io.atom_files_directory = ['../atom_files']
@@ -32,8 +32,8 @@ def optimize(pdb, pdb_path):
     env.libs.parameters.read(file='$(LIB)/par.lib')
     
     code = pdb.split('.')[0] 
-    mdl = complete_pdb(env, code)
-    mdl.write(file=os.path.join(pdb_path, code+'.ini'))
+    mdl = complete_pdb(env, pdb)
+    mdl.write(file=code+'.ini')
     
     # Select all atoms:
     atmsel = selection(mdl)
@@ -64,4 +64,4 @@ def optimize(pdb, pdb_path):
     
     mpdf = atmsel.energy()
     
-    mdl.write(file=os.path.join(pdb_path, code+'.B')
+    mdl.write(file=os.path.join(pdb_path, 'optimized.pdb'))

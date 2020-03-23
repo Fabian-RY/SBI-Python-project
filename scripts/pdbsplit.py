@@ -23,7 +23,7 @@ AA = {'ALA':'A', 'ARG':'R', 'ASN':'N', 'ASP':'D',
       'CYS':'C', 'GLN':'Q', 'GLU':'E', 'GLY':'G',
       'HIS':'H','ILE':'I','LEU':'L','LYS':'K',
       'MET':'M', 'PHE':'F','PRO':'P','SER':'S',
-      'THR':'T', 'TRP':'Y','VAL':'V','TERM':'',
+      'THR':'T', 'TRP':'W','VAL':'V','TYR':'Y', 'TERM':'',
       'UNK':'X',' DA':'A',' DG':' G', ' DC':'C', 
       ' DT':'T','  U':'U','  A':'A','  G':'G', '  C':'C'}
 
@@ -73,7 +73,6 @@ if(__name__ == '__main__'):
                 fhand = open(filename, 'w')
                 fhand.write('>{prefix}_{chain_id}\n'.format(prefix=arguments.prefix, chain_id=chain.id))
                 for residue in chain:
-                    print(AA.get(residue.resname, ''))
                     fhand.write(AA.get(residue.resname, '').replace(' ',''))
                 fhand.write('\n')
                 fhand.close()
