@@ -1,0 +1,89 @@
+---
+title: "manual"
+author: "Fabián Robledo"
+date: "25 de marzo de 2020"
+output: pdf_document
+---
+
+```{python, engine.path='/usr/bin/python3', echo=F, results='show'}
+
+import sys
+
+print('Hello from Promod using python {}'.format(sys.version[0:5]))
+```
+
+# Manual
+
+Welcome to Promod's manual. Here you will find any information you need to run this software. 
+
+## What is Promod?
+
+Promod is python tool whose goal is to form macrocomplexes of molecules starting from the interacting pairs of chains that will form the complex. 
+
+## Scientific Background
+
+## Tutorial
+
+### Installing
+
+You can install Promod easily by downloading it from the github repository and running the next command in the downloaded folder. This is, for now, the recommended install way
+
+
+```{sh, eval=F}
+pip3 install .
+```
+
+Alternatively, you can also run the setup script installation commands.
+```{sh, eval=F}
+python3 setup.py install
+```
+### Using
+
+Promod has a command line interface which explains briefly how to use it before executing it.
+
+```{sh}
+python3 main.py -h
+```
+There are 3 mandatory commands while the rest are optional. The mandatory ones are related to the input files and output folder, necessary for the program to work, and they are *-i, the input folder; -o, the output folder; and -f, the fasta file of the sequences*. All of them will be covered in this manual.
+
+#### Paramenters
+
+##### Input folder
+
+The input folder should contain, at least, 2 pdb files. This folder may contain other files or subfolders; however, the program will ignore other files and will not check subfolders to find more pdb files. If you want to include some pdb, include it in the folder before running the program.
+
+Beyond that last thing, no more things are necessary to know about the input folder. However, it's a mandatory argument, and should be indicated with -i or --input-folder tags
+
+##### Output folder
+
+The output folder is the folder where the output files are written. This is mandatory, and no special folder is required. Just a warning, as, for the moment, the model file is written as 'final_model.pdb' and thus any other file with that filename will be overwritten.
+
+The output folder is indicated with the -o or --output-folder tags
+
+##### Fasta file
+
+The fasta file contains the sequences of the chains and the id for the stoichiometry. And it's a critical file, as the sequences must be homologous for the chain in the pdb. We can hold up to 5% of differences (by default, using -t parameter can modify this threshold). However, if one of the chains (if no stoichiometry indicated) or one of the chains in the indicated stoichiometry differs too much, the program will exit.
+
+**Note:** That means the sequences in the fasta should be of a similar length than equivelent chain in the pdb. For example, the fasta file and the pdbs directly downloaded from [Protein Data Bank](https://www.rcsb.org/) may differ in the initial and ending residues, as they are quite difficult to model, and usually are removed from PDBs.
+
+#### About the stoichiometry
+
+### Uninstalling
+
+## Examples
+
+### Example 1
+
+### Example 2
+
+### Example 3
+
+### Example 4
+
+### Example 5
+
+### Example 6
+
+## FAQ
+
+## About Promod

@@ -67,11 +67,16 @@ def _parse_args():
                         dest='threshold',
                         type=float,
                         default=0.95)
-    parser.add_argument('-oo','--optimize',
+    parser.add_argument('-optimize','--optimize',
                         action='store_true',
                         help='Whether the model will be optimized with MODELLER after building or not. Default False',
                         dest='optimize',
                         default=False)
+    parser.add_argument('-start','--start',
+                        action='store',
+                        help='Indicate the initial pdb from which the protein will be assembled',
+                        dest='start',
+                        default='')
     return parser.parse_args()
 
 def _parse_stoichiometry(input_arg):
@@ -110,9 +115,14 @@ if __name__ == '__main__':
             pdb = parser.get_structure(path, path+'.pdb')
             structures.append(pdb)
     sequences = SeqIO.parse(arguments.fasta, 'fasta')
-    stoic = _parse_stoichiometry(arguments.stoichiometry) 
+    stoic = _parse_stoichiometry(arguments.stoichiometry)
     print(stoic)
     print('Building complex...')
+    if(arguments.start):
+        initial = parser.get_structure('initial', arguments.start)
+        print('Established %s as the initial structure' % arguments.start)
+    else:
+        initial = ''
     #############################################
     #          Build the complex                #
     #############################################
@@ -122,7 +132,8 @@ if __name__ == '__main__':
                                                  sequences=list(sequences),
                                                  structures=structures,
                                                  distance=arguments.distance,
-                                                 verbose=arguments.log)
+                                                 verbose=arguments.log,
+                                                 initial=initial)
     except ValueError:
         print('There are not enough pairs of pdbs to superimpose. You need at least two pdb files')
     
@@ -147,6 +158,6 @@ if __name__ == '__main__':
                   file=sys.stderr)
         else: #Optimize
             from builder import optimize
-            optimize.optimize(os.path.join(arguments.output_folder, 'final_model.pdb'), arguments.output_folder)
             print('Optimizing...')
+            optimize.optimize(os.path.join(arguments.output_folder, 'final_model.pdb'), arguments.output_folder)
     print('Model completed')

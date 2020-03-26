@@ -6,7 +6,6 @@ Created on Thu Mar 19 10:01:26 2020
 
 @author: fabian
 
-
 """
 
 # Example for: conjugate_gradients(), molecular_dynamics(), model.switch_trace()
@@ -24,7 +23,7 @@ import os
 def optimize(pdb, pdb_path):
     print(1, pdb_path)
     # Environ data
-    env = environ()
+    env = environ(0)
     env.io.atom_files_directory = ['../atom_files']
     env.edat.dynamic_sphere = True
     
