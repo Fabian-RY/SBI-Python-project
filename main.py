@@ -79,18 +79,15 @@ def _parse_args():
                         default='')
     return parser.parse_args()
 
-def _parse_stoichiometry(input_arg):
+def _parse_stoichiometry(input_file):
     '''
-        Input separated by ;
-        A2;B3;C2 
-        
-        Last element must not have ;
+        Input file with one element in the fasta per line, stoichiometry indicated by commas (,)
     '''
-    if(not input_arg): return input_arg
-    splitted = input_arg.split(';')
+    if(not input_file): return input_file
     stoic = {}
-    for element in splitted:
-        result = re.search('^(.+):([0-9]+)$', element)
+    for line in open(input_file):
+        print(line)
+        result = re.search('^(.+),([0-9]+)$', line.strip())
         if (not result): 
             raise Exception('Non valid stoichimetry')
         stoic[result.group(1)] = int(result.group(2))
@@ -116,7 +113,6 @@ if __name__ == '__main__':
             structures.append(pdb)
     sequences = SeqIO.parse(arguments.fasta, 'fasta')
     stoic = _parse_stoichiometry(arguments.stoichiometry)
-    print(stoic)
     print('Building complex...')
     if(arguments.start):
         initial = parser.get_structure('initial', arguments.start)

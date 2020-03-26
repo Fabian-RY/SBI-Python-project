@@ -44,6 +44,7 @@ def _get_chain_sequence(chain):
 def get_fastas_from_structs(structs, fastas, threshold=0.9):
     chain_fasta = {}
     for struct in structs:
+        print(struct)
         chain_fasta[struct.id] = {}
         for chain in struct.get_chains():
             chain_sequence = _get_chain_sequence(chain)
@@ -78,7 +79,6 @@ def build_complex(threshold, distance, stoichiometry, sequences, structures, ver
     failed = []
     current = 0
     done = []
-    
     
     # If an initial structure was given, introduce it into the model
     if(initial):
@@ -179,7 +179,8 @@ def build_complex(threshold, distance, stoichiometry, sequences, structures, ver
                             # If there are atoms within 2 angstroms, consider a clash
                             if len(close_atoms) > 0:
                                 clashes += 1
-                if (clashes < 10):
+                print(pair.rms)
+                if (clashes < 10 and pair.rms < 0.05):
                     for chain in atoms_of_chains:
                         chain_id = next(ids)
                         chain2 = PDB.Chain.Chain(chain_id)
@@ -202,7 +203,6 @@ def build_complex(threshold, distance, stoichiometry, sequences, structures, ver
                                     if count == len(stoichiometry):
                                         print('Stoichiometry fullfilled!')
                                         return full_structure
-                                    print(current_number_of_chains)
                         else:
                             model.child_list.append(chain2)
                     failed = []

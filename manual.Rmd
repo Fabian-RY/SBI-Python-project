@@ -18,9 +18,11 @@ Welcome to Promod's manual. Here you will find any information you need to run t
 
 ## What is Promod?
 
-Promod is python tool whose goal is to form macrocomplexes of molecules starting from the interacting pairs of chains that will form the complex. 
+Promod is python tool whose goal is to form macrocomplexes of molecules starting from the interacting pairs of chains that will form the complex.  
 
 ## Scientific Background
+
+
 
 ## Tutorial
 
@@ -85,5 +87,7 @@ The fasta file contains the sequences of the chains and the id for the stoichiom
 ### Example 6
 
 ## FAQ
+
+## Limitations
 
 ## About Promod

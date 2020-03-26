@@ -4,9 +4,27 @@
 
 import tkinter as tk
 import tkinter.filedialog
+import re
+import os
+from builder import build_macrocomplex as bm
+from Bio import SeqIO, PDB
 
 def run_promod():
     pass
+
+def _parse_stoichiometry(input_file):
+    '''
+        Input file with one element in the fasta per line, stoichiometry indicated by commas (,)
+    '''
+    if(not input_file): return input_file
+    stoic = {}
+    for line in open(input_file):
+        print(line)
+        result = re.search('^(.+),([0-9]+)$', line.strip())
+        if (not result): 
+            raise Exception('Non valid stoichimetry')
+        stoic[result.group(1)] = int(result.group(2))
+    return stoic
 
 def select_directory(entry):
     folder = tk.filedialog.askdirectory(parent=top, initialdir='.', title='Select folder')
@@ -14,31 +32,118 @@ def select_directory(entry):
     return None
 
 def select_file(entry):
-    folder = tk.filedialog.askopenfilename(parent=top, initialdir='.', title='Select folder')
+    folder = tk.filedialog.askopenfilename(parent=top, initialdir='.', title='Select file')
     entry.set(folder)
     return None
+
+def build(thres_label, dist_label, output_label, stoic_label,
+          fasta_label, folder_label, initial_label):
+    threshold = float(thres_label.get()) if thres_label.get() else 0.95
+    distance = float(dist_label.get()) if dist_label.get() else 1
+    output_file = output_label.get()
+    start = initial_label.get()
+    folder = folder_label.get()
+    stoic = _parse_stoichiometry(stoic_label.get())
+    fasta_file = fasta_label.get()
+    folder = folder_label.get()
+    if(not folder or not fasta_file or not output_file):
+        window = tk.Toplevel()
+        window.geometry('500x100')
+        text = tk.Label(window, text='Please, fill al least:\n -the input directory\n- the output directory\n -the fasta file ')
+        text.pack()
+        window.grab_set()
+        return 
+    sequences = list(SeqIO.parse(fasta_file, 'fasta'))
+    parser = PDB.PDBParser(QUIET=1)  
+    structures = list()
+    for file in os.listdir(folder):
+        if file.endswith('.pdb'):
+            path = os.path.join(folder, file[:-4])
+            pdb = parser.get_structure(path, path+'.pdb')
+            structures.append(pdb)
+    
+    bm.build_complex(threshold, distance, stoic, sequences, structures, '', parser.get_structure('start', start))
+    print('Finished...')
+    pass
 
 top = tk.Tk()
 top.title('Welcome to Promod FC')
 #top.geometry('800x600')
 
 ## Row 1: Directory with pdbs
-name = tk.Label(top, text='Promod FC 0.1')
+name = tk.Label(top, text='PDB directory')
 folder_label = tk.StringVar()
-log = tk.Entry(top, textvariable=folder_label, state='disabled')
-run = tk.Button(top, text='Select directory', command=lambda:select_directory(folder_label))
+log = tk.Entry(top, textvariable=folder_label)
+run = tk.Button(top, text='PDB directory', command=lambda:select_directory(folder_label))
 
-## Row 2: Fasta file
-fasta_label = tk.StringVar()
-fasta_entry = tk.Entry(top, textvariable=fasta_label, state='disabled')
-select_fasta_button = tk.Button(top, text='Select directory', command=lambda:select_file(fasta_label))
-
-## Row 3: Threshold
-
-name.grid()
+name.grid(column=0, row=0)
 run.grid(column=2, row=0)
 log.grid(column=1, row=0)
 
-fasta_entry.grid(column=1, row=1)
-select_fasta_button.grid(column=2, row=1)
+## Row 2: Fasta file
+output = tk.Label(top, text='Output directory')
+output_label = tk.StringVar()
+output_entry = tk.Entry(top, textvariable=output_label)
+select_output_button = tk.Button(top, text='Output directory', command=lambda:select_directory(output_label))
+
+output.grid(column=0, row=1)
+output_entry.grid(column=1, row=1)
+select_output_button.grid(column=2, row=1)
+
+## Row 2: Fasta file
+pdbs = tk.Label(top, text='Fasta file')
+fasta_label = tk.StringVar()
+fasta_entry = tk.Entry(top, textvariable=fasta_label)
+select_fasta_button = tk.Button(top, text='Fasta file', command=lambda:select_file(fasta_label))
+
+pdbs.grid(column=0, row=2)
+fasta_entry.grid(column=1, row=2)
+select_fasta_button.grid(column=2, row=2)
+
+## Row 3: Stoichiometry
+stoic = tk.Label(top, text='Stoichiometry file*')
+stoic_label = tk.StringVar()
+stoic_entry = tk.Entry(top, textvariable=stoic_label)
+select_stoic_button = tk.Button(top, text='Stoic. directory', command=lambda:select_file(stoic_label))
+
+stoic.grid(column=0, row=3)
+stoic_entry.grid(column=1, row=3)
+select_stoic_button.grid(column=2, row=3)
+
+## Row 4: Threshold
+threshold = tk.Label(top, text='Threshold*')
+thres_label = tk.StringVar()
+thres_entry = tk.Entry(top, textvariable=thres_label)
+#select_thres_button = tk.Button(top, text='Select directory', command=lambda:select_file(thres_label))
+
+threshold.grid(column=0, row=4)
+thres_entry.grid(column=1, row=4)
+
+## Row 5: Distance
+distance = tk.Label(top, text='Distance*')
+dist_label = tk.StringVar()
+dist_entry = tk.Entry(top, textvariable=dist_label)
+
+distance.grid(column=0, row=5)
+dist_entry.grid(column=1, row=5)
+
+## Row 6: Initial structure
+initial = tk.Label(top, text='Initial structure *')
+initial_label = tk.StringVar()
+initial_entry = tk.Entry(top, textvariable=initial_label)
+select_initial_button = tk.Button(top, text='Select initial file', command=lambda:select_file(initial_label))
+
+initial.grid(column=0, row=6)
+initial_entry.grid(column=1, row=6)
+select_initial_button.grid(column=2, row=6)
+
+
+run_button = tk.Button(top, text='Build complex', command=lambda: build(thres_label, dist_label, output_label,
+                                                                        stoic_label, fasta_label,
+                                                                        folder_label, initial_label))
+run_button.grid(column=1, row=7)
+
+optional = tk.Label(top, text='Elementes marked with * are optional')
+optional.grid(column=1, row=8)
+
 top.mainloop()
