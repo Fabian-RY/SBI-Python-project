@@ -26,6 +26,7 @@ def join_fasta(*fastas):
 
 if __name__ == '__main__':
     directory = sys.argv[1] # Folder with the chain pdbs
+    distance = float(sys.argv[2])
     directory_out = os.path.join(directory, 'pairs') # Folder where pairs will be saved
     PDBparser = PDB.PDBParser(QUIET=True)
     done = []
@@ -41,7 +42,7 @@ if __name__ == '__main__':
                     atoms = list(chain.get_atoms()) 
                     ns = PDB.NeighborSearch(atoms) # An object to search chains near an atom 
                     for target_atom in structure1.get_atoms():
-                        near = ns.search(target_atom.coord, 20)
+                        near = ns.search(target_atom.coord, distance)
                         if(near and (pdb_1[-5:-4],pdb_2[-5:-4]) not in done and (pdb_2[-5:-4],pdb_1[-5:-4]) not in done): # If there's an atom near, they interact
                             print('Joining chain {a} and {b}'.format(a=pdb_1[-5:-4], b=pdb_2[-5:-4]))
                             done.append((pdb_1[-5:-4],pdb_2[-5:-4]))

@@ -5,13 +5,6 @@ date: "25 de marzo de 2020"
 output: pdf_document
 ---
 
-```{python, engine.path='/usr/bin/python3', echo=F, results='show'}
-
-import sys
-
-print('Hello from Promod using python {}'.format(sys.version[0:5]))
-```
-
 # Manual
 
 Welcome to Promod's manual. Here you will find any information you need to run this software. 
@@ -70,24 +63,81 @@ The fasta file contains the sequences of the chains and the id for the stoichiom
 
 #### About the stoichiometry
 
+An additiona file with the stoichiometry can be given to the program to make sure that the final protein will contain no more than the indicated chains
+
 ### Uninstalling
 
 ## Examples
 
-### Example 1
+### Example 1 (3e0d)
 
-### Example 2
+3e0d is a small complex formed by 2 protein chains and 2 double DNA strands. It's a subunit of the eubacterial DNA polimerase but it's perfect for an initial testing of our project, so we can test how the program works, the time it takes and if the result is similar to the original one. In this cases, we have 6 different interactions, as each DNA strand is counted as a single one interacting with another one and binded to the protein chain by one of them. In fact, this complex can be thought as a dimer: two monomers formed by a protein and a double strand DNA, which interact by some residues in their protein chains.
 
-### Example 3
+The original pdb downloaded from [rscb](https://www.rcsb.org/structure/3e0d) looks like this:
 
-### Example 4
+![3e0d structure obtained from rcsb.org][3e0d_pure]
 
-### Example 5
+So, the first test to our program consists on joining the different pdb files into one single structure, without further information about the stoichiometry. Therefore, the program will try to build the protein with only the information provided by the pdb files and the fasta file. The command to build it is the next one:
 
-### Example 6
+```{sh, eval=F}
+main.py -i examples/example_1/chains/pairs -o examples/example_1/results  \
+        -f examples/example_1/3e0d.fa
+```
+
+We just need to give the folder with the input pdbs (-i), the desired output folder (-o) and the fasta file with the sequences of the proteins. The program will take the different pdbs on the folder (By alphabetical order, to make it reproducible) And the result it's incomplete:
+
+![3e0d builded structure from scratch without assistance][3e0d_fail]
+
+There we can see that there is a missing double strand DNA. So, let's see how we can complete the model. We can see that there is a missing protein, let's force the program to include it. We have two different ways of indicating this: The easiest one is selecting the starting complex of our model (which contains those missing parts). This results that different starting points can result in different models, so, it's important to select a good one. By default, the pdbs filenames are sortered alphabetically and the first one is chosen as the starting point. 
+
+The other not-so-difficult way is to indicate the stoichiometry of the complex. In this case we wil focus in selecting the starting pdb, so the command would be.
+
+```{sh, eval=F}
+main.py -i examples/example_1/chains/pairs -o examples/example_1/results \
+        -f examples/example_1/3e0d.fa -start examples/example_1/chains/pairs/3e0d_ZG.pdb
+```
+
+![3e0d indicating an starting pdb][3e0d_builded]
+
+Yay! This is fare more similar to the original structure, very close to the original model. However, this is a very simple protein, and bigger complexes may are harder to build. However, from this example, we leart that:
+
+* The program can build a model without any indication. However, it might be incomplete o have extra chains.
+* The starting pdb is a important choice that can influence the final model. Thus it is important to remember which starting point gave which result. The same starting pdb will gave the same output.
+
+### Example 2 (6gmh)
+
+6gmh is a very big complex formed by 24 different chains, with a double strand of DNA. There are several chains that interact between them, but there are not repeated sequences: each monomer is unique.  Thus, lets try to build it:
+
+```{sh, eval=F}
+main.py -i examples/example_2/chains/pairs -o examples/example_2/results  \
+        -f examples/example_2/6gmh.fa 
+```
+
+In this case, there are several chains that hasn't been added to the model, and some are repeated. So, let's select a different starting point and limit the chains with the stoichiometry, so at maximun there is 1 copy of each chain.
+
+```{sh, eval=F}
+main.py -i examples/example_2/chains/pairs -o examples/example_2/results  \
+        -f examples/example_2/6gmh.fa -start examples/example_2/chains/pairs/6ghm_VA.pdb \
+        -s examples/example_2/6gmh.stoic
+```
+
+This starting pdb was not in the model, and with this we force it to be included in the model, and start growing from there. And this way, the result contains far more chains in the model and it's far more similar to the original one.
+
+### Example 3 (3t72)
+
+### Example 4 (5nss)
+
+### Example 5 (6om3)
 
 ## FAQ
 
 ## Limitations
 
+1. The sequences in the pdb and the sequences in the fasta must be similar. The program admits a certain degree of tolerance (which can be selected by the user using the -t parameter) but using sequences in the fasta which are fairly different from the pdb will not allow the assembly of the protein. This is particularly difficult for pdb in which protein tails are not well modelled and they're not present in the pdb but they're in the fasta. The pairwise alignment with the tail will drop the score of the alignment under the threshold, forcing to decrease it or even mistake to which sequence in the fasta corresponds to jus by chance.  Thus, our recommendation is to prepare the fasta file with the sequence as similar as possible to avoid mistakes. In case you needed, in this package there is a script included, pdbsplit.py, which can give you the sequences of the chains inside the pdb file, avoiding this kind of errors up to ceratin degree. So,  if you're looking for the effect of certain mutations in the desired protein, might be worthy prepare the fasta file according to the pdb sequences.
+
 ## About Promod
+
+[3e0d_pure]: examples/example_1/imgs/3e0d_original.png
+[3e0d_fail]: examples/example_1/imgs/3e0d_fail.png
+[3e0d_builded]: examples/example_1/imgs/3e0d_builded.png
+[3e0d_start]: examples/example_1/imgs/3e0d_start.png
