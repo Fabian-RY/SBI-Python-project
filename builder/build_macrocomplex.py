@@ -44,7 +44,6 @@ def _get_chain_sequence(chain):
 def get_fastas_from_structs(structs, fastas, threshold=0.9):
     chain_fasta = {}
     for struct in structs:
-        print(struct)
         chain_fasta[struct.id] = {}
         for chain in struct.get_chains():
             chain_sequence = _get_chain_sequence(chain)
@@ -82,6 +81,7 @@ def build_complex(threshold, distance, stoichiometry, sequences, structures, ver
     
     # If an initial structure was given, introduce it into the model
     if(initial):
+        if verbose: print('Initializing complex')
         init_seqs = get_fastas_from_structs([initial], sequences)
         seqs[full_structure.id] = {}
         for idx, chain in enumerate(initial.get_chains()):
@@ -109,8 +109,9 @@ def build_complex(threshold, distance, stoichiometry, sequences, structures, ver
                                     return full_structure
             model.child_list.append(chain_new)
         done.append(initial.id)
-            
+    if verbose: print('Starting to build')
     while True:
+        if verbose: print('Loop #%i' % current)
         # All the structures where added correctly (should only be for non stoichiometric uses)
         if(not stoichiometry and len(done) == len(structures)): 
             break
@@ -122,10 +123,11 @@ def build_complex(threshold, distance, stoichiometry, sequences, structures, ver
         # If failed has an element twice, that means that no more available chains could be added
         # Therefor, it will start an endless loop, as the structure remain equal no matter which 
         # of the left structures is trying to be added. We stop it here
-        if 2 in count: # We are repeating structures
+        if 3 in count: # We are repeating structures
             if verbose: print('Some pdbs could not be joined')
             break
         if len(list(full_structure.get_chains())) == 0:
+            if verbose: print('Initializing complex')
             seqs[full_structure.id] = {}
             for idx, chain in enumerate(structure.get_chains()):
                 chain_id = next(ids)
@@ -150,7 +152,6 @@ def build_complex(threshold, distance, stoichiometry, sequences, structures, ver
                                     if count == len(stoichiometry):
                                         print('Stoichiometry fullfilled!')
                                         return full_structure
-                                    print(current_number_of_chains)
                 model.child_list.append(chain_new)
 
             done.append(structure.id)
@@ -179,7 +180,6 @@ def build_complex(threshold, distance, stoichiometry, sequences, structures, ver
                             # If there are atoms within 2 angstroms, consider a clash
                             if len(close_atoms) > 0:
                                 clashes += 1
-                print(pair.rms)
                 if (clashes < 10 and pair.rms < 0.05):
                     for chain in atoms_of_chains:
                         chain_id = next(ids)
@@ -195,18 +195,19 @@ def build_complex(threshold, distance, stoichiometry, sequences, structures, ver
                                            current_number_of_chains[seq.id] < stoichiometry[seq.id]):
                                     model.child_list.append(chain2)
                                     current_number_of_chains[seq.id] += 1
-                                    print('Stoichiometry 2')
                                     count = 0
                                     for chain in current_number_of_chains:
                                         if current_number_of_chains[chain] == stoichiometry[chain]:
                                             count += 1
+                                    if verbose: print('Current number of chains: %i' % sum(current_number_of_chains.values()))
                                     if count == len(stoichiometry):
-                                        print('Stoichiometry fullfilled!')
+                                        if verbose: print('Stoichiometry fullfilled!')
                                         return full_structure
                         else:
                             model.child_list.append(chain2)
+                            if verbose: print('Current number of chains: %i' % sum(current_number_of_chains.values()))
+                            done.append(structure.id)
                     failed = []
-                    done.append(structure.id)
                     break
         else:
             failed.append(structure.id)

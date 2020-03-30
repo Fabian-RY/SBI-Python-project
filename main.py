@@ -10,15 +10,15 @@ Executable script of our SBI-PYT project
 
 from Bio import PDB
 from Bio import SeqIO
+
 from argparse import ArgumentParser
 
 import sys
 import re
 import os
 
-
-from builder import build_macrocomplex
-from Bio import PDB
+import builder
+from builder import build_macrocomplex, errors
 
 def _parse_args():
     '''
@@ -86,10 +86,9 @@ def _parse_stoichiometry(input_file):
     if(not input_file): return input_file
     stoic = {}
     for line in open(input_file):
-        print(line)
         result = re.search('^(.+),([0-9]+)$', line.strip())
         if (not result): 
-            raise Exception('Non valid stoichimetry')
+            raise errors.stoichiometry_error(line.strip())
         stoic[result.group(1)] = int(result.group(2))
     return stoic
 
@@ -102,23 +101,30 @@ if __name__ == '__main__':
     arguments = _parse_args()
     parser = PDB.PDBParser(QUIET=1)  
     structures = list()
+    try:
+        stoic = _parse_stoichiometry(arguments.stoichiometry)
+    except errors.stoichiometry_error as e:
+        print('Error: Stoichiometry file has an invalid format in line \'%s\'.' % e.error, file=sys.stderr)
+        print('Aborting', file=sys.stderr)
+        sys.exit(-1)
     if(not os.path.exists(arguments.input_folder)):
-        print('Input folder doesn\t exist', file=sys.stderr)
+        print('Error: Input folder doesn\'t exist', file=sys.stderr)
+        print('Aborting', file=sys.stderr)
         sys.exit(1)
     print('Reading PDB files. This may take a while...')
     for file in os.listdir(arguments.input_folder):
         if file.endswith('.pdb'):
+            if(arguments.start and os.path.join(arguments.input_folder, file) == arguments.start): continue 
             path = os.path.join(arguments.input_folder, file[:-4])
             pdb = parser.get_structure(path, path+'.pdb')
             structures.append(pdb)
     sequences = SeqIO.parse(arguments.fasta, 'fasta')
-    stoic = _parse_stoichiometry(arguments.stoichiometry)
     print('Building complex...')
     if(arguments.start):
-        initial = parser.get_structure('initial', arguments.start)
+        start = parser.get_structure('initial', arguments.start)
         print('Established %s as the initial structure' % arguments.start)
-    else:
-        initial = ''
+        structures = [start] + structures
+    initial = ''
     #############################################
     #          Build the complex                #
     #############################################
@@ -132,6 +138,11 @@ if __name__ == '__main__':
                                                  initial=initial)
     except ValueError:
         print('There are not enough pairs of pdbs to superimpose. You need at least two pdb files')
+        print('Aborting')
+        sys.exit(-1)
+    except KeyError:
+        print('There are mismatches between fasta file and the pdbs. Are you sure the pdb and initial sequences have an equivalent in the fasta file?')
+        sys.exit(-1)
     
     ######################################################
     # Saving the model into a file in the indicated path #
@@ -155,5 +166,9 @@ if __name__ == '__main__':
         else: #Optimize
             from builder import optimize
             print('Optimizing...')
+            sys.stdout = open(os.devnull, 'w')
             optimize.optimize(os.path.join(arguments.output_folder, 'final_model.pdb'), arguments.output_folder)
+            sys.stdout = sys.__stdout__
+            print('Done')
     print('Model completed')
+    sys.exit(0)

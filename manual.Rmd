@@ -15,6 +15,16 @@ Promod is python tool whose goal is to form macrocomplexes of molecules starting
 
 ## Scientific Background
 
+### Introduction 
+
+Obtaining the tridimensional shape of a protein complex is a difficult and expensive process to obtain experimentally. Adding that there are thousands of different proteins in a single organism, with different splicings and mutations, which can vary even further in different spices, it's barely impossible to determine them all experimentally. Thus, finding computational ways to obtain the structure of a protein is advisable to know the structure of variations of a protein.
+
+Here we present a computational tool to ensemble proteins and nucleic acids knowing their interactions.
+
+### Input
+
+The input is a folder with 2 or more interactions betweem 2 proteins, a protein and DNA/RNA strand or 2 single DNA strands (which may or may not form a double strand). Two structures are considered to be interacting where the minimum distance between them is less than 10 Armstrong. In lesser distances, forces between atoms are strong enough to produce changes between the chains and force them to adopt a different conformation.
+
 
 
 ## Tutorial
