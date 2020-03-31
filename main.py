@@ -107,6 +107,10 @@ if __name__ == '__main__':
         print('Error: Stoichiometry file has an invalid format in line \'%s\'.' % e.error, file=sys.stderr)
         print('Aborting', file=sys.stderr)
         sys.exit(-1)
+    except FileNotFoundError as e:
+        print('Error: stoichiometry file does not exist')
+        print('Aborting')
+        sys.exit(-1)
     if(not os.path.exists(arguments.input_folder)):
         print('Error: Input folder doesn\'t exist', file=sys.stderr)
         print('Aborting', file=sys.stderr)
@@ -136,13 +140,18 @@ if __name__ == '__main__':
                                                  distance=arguments.distance,
                                                  verbose=arguments.log,
                                                  initial=initial)
+    except builder.errors.PDB_disagrees_fasta as e:
+        print('The sequences in the PDB %s are not present in the given fasta' % (e.pdb))
+        sys.exit(-1)
     except ValueError:
         print('There are not enough pairs of pdbs to superimpose. You need at least two pdb files')
         print('Aborting')
         sys.exit(-1)
-    except KeyError:
-        print('There are mismatches between fasta file and the pdbs. Are you sure the pdb and initial sequences have an equivalent in the fasta file?')
+    except builder.errors.chain_in_stoic_not_in_fasta as e:
+        print('Conflict in stoichiometry and fasta file. %s is not present in one of those files' % e.seq)
+        print('Aborting')
         sys.exit(-1)
+    
     
     ######################################################
     # Saving the model into a file in the indicated path #

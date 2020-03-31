@@ -10,6 +10,7 @@ Created on Tue Feb 25 19:39:13 2020
 """
 
 from .superimpose import Ensemble
+from . import errors
 
 from Bio import PDB
 from Bio import pairwise2
@@ -42,6 +43,12 @@ def _get_chain_sequence(chain):
     
 
 def get_fastas_from_structs(structs, fastas, threshold=0.9):
+    '''
+        Determines which of the sequences of the fastas correspond to each of the pdb chains
+        Two similar chains can refer to the same fasta sequence. 
+        
+        It will raise an exception if a schain in the pdb does not have an homologous in the fasta. 
+    '''
     chain_fasta = {}
     for struct in structs:
         chain_fasta[struct.id] = {}
@@ -56,17 +63,24 @@ def get_fastas_from_structs(structs, fastas, threshold=0.9):
                     chain_fasta[struct.id][chain.id] = seq
                     break
             else:
-                raise Exception('PDB does not correspond to fasta')
+                raise errors.PDB_disagrees_fasta(struct.id)
                 pass
     return chain_fasta
 
 def build_complex(threshold, distance, stoichiometry, sequences, structures, verbose, initial):
-    
+    '''
+        This is the core function of the program. 
+        
+        Takes a list of structures and tries to join them in a single model, taking into account
+        diferent parameters, such as
+    '''
     # Initiate empty structure and check some errors
     seqs = get_fastas_from_structs(structures, sequences)
     
+    # Initializing an empty structure to save the model
     full_structure = PDB.Structure.Structure('full')
     full_structure.add(PDB.Model.Model('model'))
+    # We will need to assign ids. For now is limited to up to 64 different chains, but more single characters can be added
     ids = _chain_id()
     iters = 0
     pair_num = len(structures)
@@ -74,7 +88,6 @@ def build_complex(threshold, distance, stoichiometry, sequences, structures, ver
         current_number_of_chains = {chain_id:0 for chain_id in set(stoichiometry)}
     if(pair_num < 2):
         raise ValueError('Needed at least 2 pairs to superpose')
-    comparisons = {}
     failed = []
     current = 0
     done = []
@@ -82,14 +95,17 @@ def build_complex(threshold, distance, stoichiometry, sequences, structures, ver
     # If an initial structure was given, introduce it into the model
     if(initial):
         if verbose: print('Initializing complex')
+        # Obtaining the sequences of the chains
         init_seqs = get_fastas_from_structs([initial], sequences)
         seqs[full_structure.id] = {}
+        # For each chain, add it to the model with sequential ids: A->B-> etc
         for idx, chain in enumerate(initial.get_chains()):
             chain_id = next(ids)
             seqs[full_structure.id][chain_id] = init_seqs[initial.id][chain.id]
             chain_new = PDB.Chain.Chain(chain_id)
             chain_new.child_list = list(chain.get_residues())
             model = next(full_structure.get_models())
+            # If stoichiometry is selected, then count which sequences will be added
             if(stoichiometry):
                 chain_sequence = _get_chain_sequence(chain_new)
                 for seq in sequences:
@@ -110,6 +126,7 @@ def build_complex(threshold, distance, stoichiometry, sequences, structures, ver
             model.child_list.append(chain_new)
         done.append(initial.id)
     if verbose: print('Starting to build')
+    # The main loop of the function
     while True:
         if verbose: print('Loop #%i' % current)
         # All the structures where added correctly (should only be for non stoichiometric uses)
@@ -130,28 +147,37 @@ def build_complex(threshold, distance, stoichiometry, sequences, structures, ver
             if verbose: print('Initializing complex')
             seqs[full_structure.id] = {}
             for idx, chain in enumerate(structure.get_chains()):
-                chain_id = next(ids)
-                seqs[full_structure.id][chain_id] = seqs[structure.id][chain.id]
+                chain_id = next(ids) # Selecting the next id available
+                seqs[full_structure.id][chain_id] = seqs[structure.id][chain.id] # Assigning the new chains its sequence
+                # Empty new chain with the new id
                 chain_new = PDB.Chain.Chain(chain_id)
+                # Adding the residues to the new chain and adding the chain to the new model
                 chain_new.child_list = list(chain.get_residues())
                 model = next(full_structure.get_models())
+                # Check stoichiometry if needed
                 if(stoichiometry):
+                    # Need the exact sequence to align
                     chain_sequence = _get_chain_sequence(chain_new)
+                    # Align with every sequence in the fasta to know which sequence is 
                     for seq in sequences:
                         alignment = pairwise2.align.globalxx(chain_sequence, seq.seq, one_alignment_only=True) 
-                        # This chain corresponds to this stoichiometry chain
+                        try:
+                            current_number_of_chains[seq.id]
+                        except KeyError:
+                            # The sequence chain is not in the stoichiometry
+                            raise errors.chain_in_stoic_not_in_fasta(seq.id)
+                        # If homologous and does not surpass the stoichiometry, add it
                         if(alignment[0][2]/len(alignment[0][0])> threshold and
-                           current_number_of_chains[seq.id] < stoichiometry[seq.id]):
+                            current_number_of_chains[seq.id] < stoichiometry[seq.id]):
                             model.child_list.append(chain_new)
                             current_number_of_chains[seq.id] += 1
-                            if(stoichiometry):
-                                count = 0
-                                for chain in current_number_of_chains:
-                                    if current_number_of_chains[chain] == stoichiometry[chain]:
-                                        count += 1
-                                    if count == len(stoichiometry):
-                                        print('Stoichiometry fullfilled!')
-                                        return full_structure
+                            count = 0
+                            for chain in current_number_of_chains:
+                                if current_number_of_chains[chain] == stoichiometry[chain]:
+                                    count += 1
+                                if count == len(stoichiometry):
+                                    print('Stoichiometry fullfilled!')
+                                    return full_structure
                 model.child_list.append(chain_new)
 
             done.append(structure.id)
@@ -205,13 +231,12 @@ def build_complex(threshold, distance, stoichiometry, sequences, structures, ver
                                         return full_structure
                         else:
                             model.child_list.append(chain2)
-                            if verbose: print('Current number of chains: %i' % sum(current_number_of_chains.values()))
+                            if verbose and stoichiometry: print('Current number of chains: %i' % sum(current_number_of_chains.values()))
                             done.append(structure.id)
                     failed = []
                     break
         else:
             failed.append(structure.id)
-            comparisons[structure.id] = comparisons.get(structure.id, 0) +1
             # Pdbs clash
         current += 1
     return full_structure
