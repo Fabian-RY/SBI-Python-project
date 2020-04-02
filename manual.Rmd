@@ -50,7 +50,7 @@ After that, it's possible that the position of the atoms inside the model may no
 
 ### Input
 
-The input is a folder with 2 or more interactions betweem 2 proteins, a protein and DNA/RNA strand or 2 single DNA strands (which may or may not form a double strand). Two structures are considered to be interacting where the minimum distance between them is less than 10 Armstrong. In lesser distances, forces between atoms are strong enough to produce changes between the chains and force them to adopt a different conformation, an thus, a realistic model must keep the residues at a real distance to consider it correct
+The input is a folder with 2 or more interactions betweem 2 proteins, a protein and DNA/RNA strand or 2 single DNA strands (which may or may not form a double strand). Two structures are considered to be interacting where the minimum distance between them is less than 10 Armstrong. However, in lesser distances, forces between atoms are strong enough to produce changes between the chains and force them to adopt a different conformation, an thus, a realistic model must keep the residues at a real distance to consider it correct.
 
 ### Output
 
@@ -88,9 +88,15 @@ python3 setup.py install
 Promod has a command line interface which explains briefly how to use it before executing it.
 
 ```{sh}
-python3 main.py -h
+promod -h
 ```
 There are 3 mandatory commands while the rest are optional. The mandatory ones are related to the input files and output folder, necessary for the program to work, and they are *-i, the input folder; -o, the output folder; and -f, the fasta file of the sequences*. All of them will be covered in this manual.
+
+It also has a graphical interface wich accepts the same paramenters but grphically with message boxes and graphical stuff. It's an independent executable, so the CLI one can be used for automation without confusion
+
+```{sh eval=F}
+promod-tk 
+```
 
 #### Paramenters
 
@@ -106,22 +112,32 @@ The output folder is the folder where the output files are written. This is mand
 
 The output folder is indicated with the -o or --output-folder tags
 
+#### Distance
+ 
+You can indicate the minimum distance to consider that two proteins do not clash. The molel will discard interactions with too much atoms at lesser distance than the value indicated in Argmstrongs. Being too strictive can discard some interactions, but being so flexible can force chains to overlap and not being energetically favorable.
+
+You can indicate the distance with the -d or --distance tags
+
+#### Threshold
+
+The threshold is the minimum score alignments must reach in order to insert the chain in the model and determinate its homologous protein. Usually a very high value (0.9 or higher) is recommended to ensure that the chains are correctly identified. However, for sequences with less homology might be needed to reduce this value.
+
 ##### Fasta file
 
 The fasta file contains the sequences of the chains and the id for the stoichiometry. And it's a critical file, as the sequences must be homologous for the chain in the pdb. We can hold up to 5% of differences (by default, using -t parameter can modify this threshold). However, if one of the chains (if no stoichiometry indicated) or one of the chains in the indicated stoichiometry differs too much, the program will exit. This is use to avoid guessing posible chains that could match as that would produce unexpected results.
 
 **Note:** That means the sequences in the fasta should be of a similar length than equivelent chain in the pdb. For example, the fasta file and the pdbs directly downloaded from [Protein Data Bank](https://www.rcsb.org/) may differ in the initial and ending residues, as they are quite difficult to model, and usually are removed from PDBs.
 
-#### About the stoichiometry
+#### Stoichiometry file
 
-An additiona file with the stoichiometry can be given to the program to make sure that the final protein will contain no more than the indicated chains
+An additional file with the stoichiometry can be given to the program to make sure that the final protein will contain no more than the indicated chains
 
 ### Uninstalling
 
 You can uninstall everything by using 
 
 ```{sh, eval=F}
-pip3 unistall pro-mod-FC
+pip3 unistall promod
 ```
 
 ## Examples

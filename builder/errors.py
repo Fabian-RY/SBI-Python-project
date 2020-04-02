@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 class seq_not_in_pdb(Exception):
-    
+    '''
+        The sequences are not in pdb and thus the protein complex cannot be build
+    '''
     def __init__(self, seq, pdb):
         self.seq = seq
         self.pdb = pdb
@@ -11,12 +13,16 @@ class seq_not_in_pdb(Exception):
         pass
     
 class non_valid_input(Exception):
-    
+    '''
+        The input used is not correct and cannot be used
+    '''
     def __init__(self):
         pass
     
 class stoichiometry_error(Exception):
-    
+    '''
+        The stoichiometry file is not correct
+    '''
     def __init__(self, line):
         self.line = line
         pass
@@ -26,10 +32,15 @@ class stoichiometry_error(Exception):
     
     @property
     def error(self):
+        '''
+            The stoichiometry line that is not correctly formated
+        '''
         return self.line
     
 class chain_in_stoic_not_in_fasta(Exception):
-    
+    '''
+        A sequence asked in the stoichiometry is not available in the fasta file
+    '''
     def __init__(self, sequence):
         self._seq = sequence
         
@@ -41,7 +52,9 @@ class chain_in_stoic_not_in_fasta(Exception):
         return self._seq
     
 class PDB_disagrees_fasta(Exception):
-    
+    '''
+        A PDB sequence chain has not an homologous in the PDB and cannot continue 
+    '''
     def __init__(self, pdb_id):
         self.id = pdb_id
         

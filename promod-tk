@@ -4,8 +4,10 @@
 
 import tkinter as tk
 import tkinter.filedialog
+import tkinter.messagebox
 import re
 import os
+from builder import errors
 from builder import build_macrocomplex as bm
 from Bio import SeqIO, PDB
 
@@ -37,7 +39,7 @@ def select_file(entry):
     return None
 
 def build(thres_label, dist_label, output_label, stoic_label,
-          fasta_label, folder_label, initial_label):
+          fasta_label, folder_label, initial_label, button):
     threshold = float(thres_label.get()) if thres_label.get() else 0.95
     distance = float(dist_label.get()) if dist_label.get() else 1
     output_file = output_label.get()
@@ -47,11 +49,7 @@ def build(thres_label, dist_label, output_label, stoic_label,
     fasta_file = fasta_label.get()
     folder = folder_label.get()
     if(not folder or not fasta_file or not output_file):
-        window = tk.Toplevel()
-        window.geometry('500x100')
-        text = tk.Label(window, text='Please, fill al least:\n -the input directory\n- the output directory\n -the fasta file ')
-        text.pack()
-        window.grab_set()
+        tkinter.messagebox.showerror('Missing elements', 'Please fill the input folder, the output folder and the fasta file')
         return 
     sequences = list(SeqIO.parse(fasta_file, 'fasta'))
     parser = PDB.PDBParser(QUIET=1)  
@@ -61,9 +59,29 @@ def build(thres_label, dist_label, output_label, stoic_label,
             path = os.path.join(folder, file[:-4])
             pdb = parser.get_structure(path, path+'.pdb')
             structures.append(pdb)
-    
-    bm.build_complex(threshold, distance, stoic, sequences, structures, '', parser.get_structure('start', start))
-    print('Finished...')
+    try:
+        model = bm.build_complex(threshold=threshold,
+                                                 stoichiometry=stoic, 
+                                                 sequences=list(sequences),
+                                                 structures=structures,
+                                                 distance=distance,
+                                                 verbose=False,
+                                                 initial=start)
+    except errors.PDB_disagrees_fasta as e:
+        tkinter.messagebox.showerror('PDB or Fasta error', 'Sequence in the PDB doesn\'t match with any in the fasta')
+    except ValueError:
+        tkinter.messagebox.showerror('PInput error', 'Input folder has less than 2 PDB files')
+    except errors.chain_in_stoic_not_in_fasta as e:
+        tkinter.messagebox.showerror('Stoichiometry error', 'Stoichiometry ask for an inexistent sequence in the fasta')
+    else:
+        tkinter.messagebox.showinfo('Done', 'Process complete. Model saved in the indicated folder')
+        print('Finished...')
+        print('Saving complex...')
+        io = PDB.PDBIO()
+        io.set_structure(model)
+        if(not os.path.exists(output_file)):
+            os.mkdir(output_file)
+        io.save(os.path.join(output_file, 'final_model.pdb'))
     pass
 
 top = tk.Tk()
@@ -140,7 +158,7 @@ select_initial_button.grid(column=2, row=6)
 
 run_button = tk.Button(top, text='Build complex', command=lambda: build(thres_label, dist_label, output_label,
                                                                         stoic_label, fasta_label,
-                                                                        folder_label, initial_label))
+                                                                        folder_label, initial_label, run_button))
 run_button.grid(column=1, row=7)
 
 optional = tk.Label(top, text='Elementes marked with * are optional')
