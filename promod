@@ -176,8 +176,9 @@ if __name__ == '__main__':
             from builder import optimize
             print('Optimizing...')
             sys.stdout = open(os.devnull, 'w')
-            optimize.optimize(os.path.join(arguments.output_folder, 'final_model.pdb'), arguments.output_folder)
+            energies = optimize.optimize(os.path.join(arguments.output_folder, 'final_model.pdb'), arguments.output_folder)
             sys.stdout = sys.__stdout__
-            print('Done')
+            print('Energy before optimizing: %s' % str(energies[0][0]))
+            print('Energy after optimizing: %s' % str(energies[1][0]))
     print('Model completed')
     sys.exit(0)
