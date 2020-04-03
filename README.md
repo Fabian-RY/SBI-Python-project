@@ -30,7 +30,7 @@ A PDF file with all the contents is also [available](manual.pdf).
 
 ## About
 
-This program is a project for the Structural  Bioinformatics and Introduction to Python subjects of the MSc in  Bioinformatics for Health Sciences at Universitat Pompeu Fabra  (Barcelona).
+This program is a project for the Structural  Bioinformatics and Introduction to Python subjects of the [MSc in  Bioinformatics for Health Sciences](https://www.upf.edu/web/bioinformatics) at [Universitat Pompeu Fabra  (Barcelona)](www.upf.edu).
 
 #### Fabián Robledo Yagüe and Claudio Díaz García
 
