@@ -72,6 +72,11 @@ pip3 install biopython
 
 ### Instalation
 
+The recommended way to install promod is by using pip, exaclty with the same command as we did with biopython previously
+```{sh, eval=F}
+pip3 install promod
+```
+
 You can install Promod easily by downloading it from the github repository and running the next command in the downloaded folder. This is, for now, the recommended install way
 
 ```{sh, eval=F}
