@@ -8,25 +8,27 @@ If you are using Windows, you can download Python3 from [its website](www.python
 
 Independently of the operating system you run, you can install Biopython using `pip`.
 
-```{sh, eval=F}
+```
 pip3 install biopython
 ```
 
 ### Installation
 
 The recommended way to install Promod is by using `pip`, exactly with the same command as we indicated with Biopython above.
-```{sh, eval=F}
+
+```
 pip3 install promod
 ```
 
 You can install Promod easily by downloading it from the Github repository and running the next command in the downloaded folder. That is the recommended installation procedure.
 
-```{sh, eval=F}
+```
 pip3 install .
 ```
 
 Alternatively, you can also run the `setup` installation script, as follows:
-```{sh, eval=F}
+
+```
 python3 setup.py install
 ```
 

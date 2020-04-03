@@ -70,7 +70,7 @@ The most striking features of Promod are:
 
 ## Implementation
 
-The Promod package is implemented in Python3. It strongly depends on the Biopython library, which is an installation requirement for the correct execution of this software. The GUI has been developed under the Tkinter framework, providing a user-friendly interface and, thus, avoiding the use of the command line. The implementation of the GUI and the CLI are independent, so each one can be executed on its own. This software works with well-established bioinformatics formats, such as FASTA and PDB files, so no atypical formatting of input data shall be conducted. Additionally, two scripts are provided to divide a given PDB file in separate pairs of chains and join them if there is an interaction between the molecules. Some examples are also included for the testing of the program. Promod is freely available from the following Github repository. URL: https://github.com/Fabian-RY/SBI-Python-project.
+The Promod package is implemented in Python3. It strongly depends on the Biopython library, which is an installation requirement for the correct execution of this software. The GUI has been developed under the Tkinter framework, providing a user-friendly interface and, thus, avoiding the use of the command line. The implementation of the GUI and the CLI are independent, so each one can be executed on its own. This software works with well-established bioinformatics formats, such as FASTA and PDB files, so no atypical formatting of input data shall be conducted. Additionally, two scripts are provided to divide a given PDB file in separate pairs of chains and join them if there is an interaction between the molecules. Some examples are also included for the testing of the program. Promod is freely available from the following Github repository. URL: [https://github.com/Fabian-RY/SBI-Python-project](https://github.com/Fabian-RY/SBI-Python-project).
 
 The formatted documentation of the package includes dependencies and installation instructions, examples of use and a full tutorial with sample code. Each function has got its own documentation that instructs on the particularities when importing them to be used independently. The users could learn all knowledge of the library by looking up the detailed documentation. The main functionalities are further explained in the tutorial section.
 
@@ -140,25 +140,27 @@ If you are using Windows, you can download Python3 from [its website](www.python
 
 Independently of the operating system you run, you can install Biopython using `pip`.
 
-```{sh, eval=F}
+```
 pip3 install biopython
 ```
 
 ### Installation
 
 The recommended way to install Promod is by using `pip`, exactly with the same command as we indicated with Biopython above.
-```{sh, eval=F}
+
+```
 pip3 install promod
 ```
 
 You can install Promod easily by downloading it from the Github repository and running the next command in the downloaded folder. That is the recommended installation procedure.
 
-```{sh, eval=F}
+```
 pip3 install .
 ```
 
 Alternatively, you can also run the `setup` installation script, as follows:
-```{sh, eval=F}
+
+```
 python3 setup.py install
 ```
 
