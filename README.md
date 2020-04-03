@@ -10,9 +10,71 @@ Promod is a Python tool whose goal is to model macrocomplexes of  molecules star
 
 In essence, the builder approach is similar to a genomic assembler:  it seeks for similar chains in the different PDB files given as input  and overlaps them. The builder places pair by pair all the possible  chains into a single model.
 
+## Features
+
+1. Building of macromolecular complexes from basic input data (pairs of interactions between molecules).
+2. Optimization of the final model using MODELLER.
+3. Graphical user interface (GUI), with the same functionalities as the command line interface (CLI).
+
+## Requirements
+
+This software is written in the Python3 language programming. You need to [install the Python3](https://wiki.python.org/moin/BeginnersGuide/Download) interpreter on your computer.
+
+The [Biopython library](https://biopython.org/) is also needed for the correct performance of this software. Independently of the operating system you are using, you can install Biopython using `pip`:
+
+```
+pip3 install biopython
+```
+
 
 
 ## Installation
+
+The recommended way to install Promod is by using `pip`, exactly with the same command as we indicated with Biopython above.
+
+```
+pip3 install promod
+```
+
+You can install Promod easily by downloading it from the Github repository and running the next command in the downloaded folder. That is the recommended installation procedure.
+
+```
+pip3 install .
+```
+
+Alternatively, you can also run the `setup` installation script, as follows:
+
+```
+python3 setup.py install
+```
+
+You can **uninstall** this software by using the following command, if it was installed using `pip3`:
+
+```
+pip3 uninstall promod
+```
+
+However, if it was installed via `setup.py`, all files must be deleted manually.
+
+## Execution
+
+The basic usage of Promod, providing only the mandatory arguments, would be as follows:
+
+```
+promod -i [INPUT_FOLDER] -o [OUTPUT_FOLDER] -f [FASTA_FILE]
+```
+
+Additional arguments can also be indicated. For further information, read the manual or use the package help:
+
+```
+promod -h
+```
+
+To run the Graphical User Interface, you only need to call the corresponding file:
+
+```
+promod-tk
+```
 
 
 
