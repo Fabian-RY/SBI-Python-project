@@ -6,6 +6,8 @@ Created on Thu Mar 19 10:01:26 2020
 
 @author: fabian
 
+A simple function that uses modeller to improve energie
+
 """
 
 # Example for: conjugate_gradients(), molecular_dynamics(), model.switch_trace()
@@ -41,7 +43,7 @@ def optimize(pdb, pdb_path):
     mdl.restraints.make(atmsel, restraint_type='stereo', spline_on_site=False)
     mdl.restraints.write(file=code+'.rsr')
     
-    mpdf = atmsel.energy()
+    mpdf_prior = atmsel.energy()
     
     # Create optimizer objects and set defaults for all further optimizations
     cg = conjugate_gradients(output='REPORT')
@@ -61,6 +63,7 @@ def optimize(pdb, pdb_path):
     cg.optimize(atmsel, max_iterations=20,
                 actions=[actions.trace(5, trcfil)])
     
-    mpdf = atmsel.energy()
+    mpdf_after = atmsel.energy()
     
     mdl.write(file=os.path.join(pdb_path, 'optimized.pdb'))
+    return (mpdf_prior, mpdf_after)

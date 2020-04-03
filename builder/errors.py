@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+'''
+    Different errors that are recognised and the program must stop are written here
+'''
+
 class seq_not_in_pdb(Exception):
     '''
         The sequences are not in pdb and thus the protein complex cannot be build
@@ -19,9 +23,12 @@ class non_valid_input(Exception):
     def __init__(self):
         pass
     
+    def __str__(self):
+        return 'Invalid input. Check it twice'
+    
 class stoichiometry_error(Exception):
     '''
-        The stoichiometry file is not correct
+        The stoichiometry file is not correct and thus can not be used
     '''
     def __init__(self, line):
         self.line = line

@@ -10,13 +10,13 @@ output:
 
 # Manual
 
-Welcome to Promod's manual. Here you will find any information you need to run this software. 
+Welcome to Promod's manual. Here you will find all the information you need to run this software. This program is a project for the Structural Bioinformatics subject and the Introduction to Python project of the Msc in Bioinformatics of Universitat Pompeu Fabra.
 
 ## What is Promod?
 
-Promod is python tool whose goal is to form macrocomplexes of molecules starting from the interacting pairs of chains that will form the complex. It is compatible with protein chains, single and double DNA strands and RNA strands. It has several parameters available to play with according to the users needs.
+Promod is a python tool whose goal is to form macrocomplexes of molecules starting from the interacting pairs of chains that will form the complex. It is compatible with protein chains, single and double DNA strands and RNA strands. It has several parameters available to play with according to the users needs.
 
-In essence, the builder is similar to a genomic assembler: seeks for similar chains in the different PDB files given as an input and overlaps them. After that, joins the chains in a single model. Pair by pair the builder puts all the possible chains inside a single model
+In essence, the builder approach is similar to a genomic assembler: seeks for similar chains in the different PDB files given as an input and overlaps them. After that, joins the chains in a single model. Pair by pair the builder puts all the possible chains inside a single model
 
 ## Scientific Background
 
@@ -28,33 +28,33 @@ Here we present a computational tool to ensemble proteins and nucleic acids know
 
 ### Homology of the subunits
 
-In order to build the model, we start with several files, each containing exclusively two chains (whether aminoacidical, DNA or RNA). By looking to similar proteins in two different pdbs, we can overlap them in the space to check if two chains of those pdbs are similar, and using this similarity to join them in the same model. This is known as protein superimposition, and the full process of joining is similar to a DNA sequence assembly: we have to recognise that two sequences are the same, and join them in the correct spot.
+In order to build the model, we start with several files: each file containis two chains (whether aminoacidical, DNA or RNA) representing an interaction between those chains. By looking to similar proteins in two different pdbs, we can overlap them in the space to check if two chains of those pdbs are similar. After that, we precisely use that similiarity to join them in a single model. This is known as protein superimposition, and the full process of joining is similar to a DNA sequence assembly: we have to recognise that two sequences are highly similar, and join them in the correct spot.
 
-In order to consider two chains in diferent pdbs the same protein and overlap them, they must be homologous. To check whether two proteins or not are homologous, a pairwise alignment is made. This is a calculation of how much similar two sequences are, that takes both mutations and gaps into account to give a numeric score between 0 and 1. A score of 1 means that both sequences are identical, while high values indicate how similar the sequences are. So, to consider them homologous, a high score must be achieved between two proteins. Only the homologous proteins will be overlaped and used to build the model
+In order to consider two chains in diferent pdbs the same protein and overlap them, they must be homologous. To check whether two proteins are or not are homologous, a pairwise alignment is made. This is a calculation of how similar two sequences are, that takes both mutations and gaps into account to give a numeric score between 0 and 1. A score of 1 means that both sequences are identical, while high values indicate how similar the sequences are. So, to consider them homologous, a high score must be achieved between two proteins. Only the homologous proteins will be overlaped and used to build the model.
 
 ### Superimposition of the 3D structure
 
 Two homologous sequences will probably have similar structures. However, it's also possible that two proteins with lower homology score can have similar structures in space, as result of convergent evolution. Therefore, when two sequences are quite different but they may have similar structures, the may fullfill the same rol in our model and it's advisable to consider them: for example, two homologous proteins from distant species whose alignment doesn't pass our homologous threshold, but they still conserve the structure.
 
-To consider them in our model, we need another measure to check if they really have similar structures, the root median square deviation (RMSD now onwars). To check this value, first we need to superimpose those two proteins; that's putting the atoms of both proteins in the same place with the same orientation to check how good or bad they overlape in space; similar structures will have atoms in nearly the same position, while different structures will differ. This similarity between the superimposed proteins can be used to calcule the RMSD, which is the average distance between the superimposed atoms. A value near zero indicates that both structures fits perfectly, and increases when the differences between the proteins structure start to grow. 
+To consider them in our model, we need another measure to check if they really have similar structures, the root median square deviation (RMSD now onwars). To check this value, first we need to superimpose those two proteins; that's putting the atoms of both proteins in the same place with the same orientation to check how good or bad they overlape in space; similar structures will have atoms in nearly the same position, while different structures will differ. The average distance (measured in argmstrongs) between the superimposed atoms is the RMSD. 
 
-This way, RMSD must also be a filter we must also filter those structures that are differents even if we consider them homologous.
+This way, RMSD must also be a filter we must also filter those structures that are differents even if we consider them homologous, as they can have very different 3D structures.
 
 ### Energy levels
 
-Lastly, it's important to consider the final energy levels of the model. A good model of a complex should have minimum energy, as a functional, existing complex usually is, of every possible folding result of the complex, the one with minimum energy. Two atoms that are too close, hidrophobic residues in the external part of the model and several other considerations can increase the final energy of the complex, which must be corrected in a good model.
+Lastly, it's important to consider the final energy levels of the model. A good model of a complex should have minimum energy, as a functional, valid complex usually has the lowest energy among the possible foldings of the complex. Two atoms that are too close, hidrophobic residues in the external part of the model and several other considerations can increase the final energy of the complex, which must be corrected in a good model.
 
-Two atoms too close can also indicate that two proteins are not correctly joined. For example, if several atoms of a chain might be to close of another chain (or even *inside*), those proteins should not be joined, even if they interact. Taking this into account avoids impossible protenis, such as those which are inside other chains but breaking several laws of thermodynamics and physics. 
-
-After that, it's possible that the position of the atoms inside the model may not be the most adequate. It's possible that little variations in some atoms' positions that conseve the protein structure 
+Two atoms too close can also indicate that two proteins are not correctly joined. For example, if several atoms of a chain might be too close of another chain (or even *inside*), those proteins should not be joined, even if they interact. Taking this into account avoids  impossible proteins, such as those which are inside other chains but breaking several laws of thermodynamics and physics. 
 
 ### Input
 
-The input is a folder with 2 or more interactions betweem 2 proteins, a protein and DNA/RNA strand or 2 single DNA strands (which may or may not form a double strand). Two structures are considered to be interacting where the minimum distance between them is less than 10 Armstrong. However, in lesser distances, forces between atoms are strong enough to produce changes between the chains and force them to adopt a different conformation, an thus, a realistic model must keep the residues at a real distance to consider it correct.
+The input is a folder with two or more files: each file contains two proteins, a protein and DNA/RNA strand or 2 single DNA strands (which may or may not form a double strand), which represent an interaction between those chains. Two structures are considered to be interacting if the minimum distance between them is in a range of a few Argmstrongs (1-10) . However, in lesser distances, forces between atoms are strong enough to produce changes between the chains and force them to adopt a different conformation, an thus, a realistic model must keep the residues at an adequate distance to consider it correct.
 
 ### Output
 
 The output is mainly one pdb file with all the possible chains joined in the selected folder. However, if the optimized option was selected, several pdb files will be created in the same directory. These are different approaches made by modeller to optimize the energies of the model and the files it used. The model will be saved as final_model.pdb
+
+If the model is required with minimum energy, and thus the -optimize flag is used, then several files will be saved. Modeller will save some mid-step pdbs as 'final-model.DXXXXX.pdb' and the fully optimized will be saved as 'optimized.pdb'
 
 ## Tutorial
 
@@ -71,6 +71,11 @@ pip3 install biopython
 ```
 
 ### Instalation
+
+The recommended way to install promod is by using pip, exaclty with the same command as we did with biopython previously
+```{sh, eval=F}
+pip3 install promod
+```
 
 You can install Promod easily by downloading it from the github repository and running the next command in the downloaded folder. This is, for now, the recommended install way
 
@@ -92,7 +97,7 @@ promod -h
 ```
 There are 3 mandatory commands while the rest are optional. The mandatory ones are related to the input files and output folder, necessary for the program to work, and they are *-i, the input folder; -o, the output folder; and -f, the fasta file of the sequences*. All of them will be covered in this manual.
 
-It also has a graphical interface wich accepts the same paramenters but grphically with message boxes and graphical stuff. It's an independent executable, so the CLI one can be used for automation without confusion
+It also has a graphical interface wich accepts the same paramenters but graphically with message boxes and graphical stuff. It's an independent executable, so the CLI one can be used for automation without confusion. The comand is simple:
 
 ```{sh eval=F}
 promod-tk 
@@ -114,7 +119,7 @@ The output folder is indicated with the -o or --output-folder tags
 
 #### Distance
  
-You can indicate the minimum distance to consider that two proteins do not clash. The molel will discard interactions with too much atoms at lesser distance than the value indicated in Argmstrongs. Being too strictive can discard some interactions, but being so flexible can force chains to overlap and not being energetically favorable.
+You can indicate the minimum distance to consider that two proteins do not clash. The model will discard interactions with too many atoms at lesser distance than the value indicated in Argmstrongs. Being too strictive can discard some interactions, but being too flexible can force chains to overlap and not being energetically favorable.
 
 You can indicate the distance with the -d or --distance tags
 
@@ -126,19 +131,39 @@ The threshold is the minimum score alignments must reach in order to insert the 
 
 The fasta file contains the sequences of the chains and the id for the stoichiometry. And it's a critical file, as the sequences must be homologous for the chain in the pdb. We can hold up to 5% of differences (by default, using -t parameter can modify this threshold). However, if one of the chains (if no stoichiometry indicated) or one of the chains in the indicated stoichiometry differs too much, the program will exit. This is use to avoid guessing posible chains that could match as that would produce unexpected results.
 
-**Note:** That means the sequences in the fasta should be of a similar length than equivelent chain in the pdb. For example, the fasta file and the pdbs directly downloaded from [Protein Data Bank](https://www.rcsb.org/) may differ in the initial and ending residues, as they are quite difficult to model, and usually are removed from PDBs.
+**Note:** That means the sequences in the fasta should be of a similar length than equivlent chain in the pdb. For example, the fasta file and the pdbs directly downloaded from [Protein Data Bank](https://www.rcsb.org/) may differ in the initial and ending residues, as they are quite difficult to model, and usually are removed from PDBs.
 
 #### Stoichiometry file
 
-An additional file with the stoichiometry can be given to the program to make sure that the final protein will contain no more than the indicated chains
+An additional file with the stoichiometry can be given to the program to make sure that the final protein will contain no more than the indicated chains. This file must be properly formatted as follows:
+
+chain_id_in_fasta,number_of_columns
+
+one per line
+
+Let's see the stoichiometry file of the example 1
+
+```{pseudocode}
+3e0d_A,2
+3e0d_B,2
+3e0d_C,2
+```
+
+#### Starting pdb
+
+Promod's result is highly dependant on the first pdb used to build the model. In fact, results can be very different by varing the starting pdb. Thus we provide an optional argument to select this staring pdb to select different starting pdbs. This way, the same pdb with the same parameters will provide the same model. By default, the pdb files are sortered alphabetically and the first one in this sorted list is chosen. 
+
+The starting pdb can be selected with -start
 
 ### Uninstalling
 
-You can uninstall everything by using 
+You can uninstall everything by using if installed using pip3
 
 ```{sh, eval=F}
 pip3 unistall promod
 ```
+
+However, if installed calling setup.py, files must be deleted manually.
 
 ## Examples
 
@@ -152,7 +177,7 @@ So, the first test to our program consists on joining the different pdb files in
 
 
 ```{sh, eval=F}
-python3 main.py -i examples/example_1/chains/pairs -o examples/example_1/results  \
+promod -i examples/example_1/chains/pairs -o examples/example_1/results  \
         -f examples/example_1/3e0d.fa
 ```
 
@@ -160,14 +185,14 @@ We just need to give the folder with the input pdbs (-i), the desired output fol
 
 There we can see that there is a missing double strand DNA. So, let's see how we can complete the model. We can see that there is a missing protein, let's force the program to include it. We have two different ways of indicating this: The easiest one is selecting the starting complex of our model (which contains those missing parts). This results that different starting points can result in different models, so, it's important to select a good one. By default, the pdbs filenames are sortered alphabetically and the first one is chosen as the starting point. In fact, this is an important choice: the differences between not chosing one (Figure 1.b) chosing an adequate one (Figure 1.c) or chosing another one (Figure 1.d) can result in models with extra chains or with less chains than expected
 
-The other not-so-difficult way is to indicate the stoichiometry of the complex. In this case we wil focus in selecting the starting pdb, so the command would be.
+The other not-so-difficult way is to indicate the stoichiometry of the complex. In this case we will focus in selecting the starting pdb, so the command would be.
 
 ```{sh, eval=F}
-python3 main.py -i examples/example_1/chains/pairs -o examples/example_1/results \
+promod -i examples/example_1/chains/pairs -o examples/example_1/results \
         -f examples/example_1/3e0d.fa -start examples/example_1/chains/pairs/3e0d_ZG.pdb
 ```
 
-Yay! This is fare more similar to the original structure, very close to the original model. However, this is a very simple protein, and bigger complexes may are harder to build. However, from this example, we leart that:
+Yay! This is fare more similar to the original structure, very close to the original model. However, this is a very simple protein, and bigger complexes may are harder to build. However, from this example, we learnt that:
 
 * The program can build a model without any indication. However, it might be incomplete o have extra chains.
 * The starting pdb is a important choice that can influence the final model. Thus it is important to remember which starting point gave which result. The same starting pdb will gave the same output.
@@ -182,14 +207,14 @@ Yay! This is fare more similar to the original structure, very close to the orig
 Thus, lets try to build it:
 
 ```{sh, eval=F}
-python3 main.py -i examples/example_2/chains/pairs -o examples/example_2/results  \
+promod -i examples/example_2/chains/pairs -o examples/example_2/results  \
         -f examples/example_2/6gmh.fa 
 ```
 
 In this case, there are several chains that hasn't been added to the model, and some are repeated. So, let's select a different starting point and limit the chains with the stoichiometry, so at maximun there is 1 copy of each chain.
 
 ```{sh, eval=F}
-python3 main.py -i examples/example_2/chains/pairs -o examples/example_2/results  \
+promod -i examples/example_2/chains/pairs -o examples/example_2/results  \
         -f examples/example_2/6gmh.fa -start examples/example_2/chains/pairs/6ghm_VA.pdb \
         -s examples/example_2/6gmh.stoic
 ```
@@ -205,8 +230,9 @@ This starting pdb was not in the model, and with this we force it to be included
 Here we want to show how to use two parameters we haven't shown yet: distance and threshold. Distance is a value that considers if two atoms collide, which is not allowed, as two atoms very close would have very high energy (if the separation between them is less than distance, it's considered invalid. However, to avoid some errors, up to 10 atoms colliding are allowed to consider a valid interaction). Threshold, however, makes reference to the homology percentage between the pdb sequences between themselves and between the sequences in the fasta. This allows for certain flexibility in sequences with some mutations that may alter the conformation of the chain.
 
 ```{sh, eval=F}
-python3 main.py -i examples/example_4/chains/pairs -o examples/example_4/results  \
-        -f examples/example_4/5nss.fa -d 2 -t 0.9 -start examples/example_4/chains/pairs/5nss_NG.pdb
+promod -i examples/example_3/chains/pairs -o examples/example_3/results  \
+        -f examples/example_3/5nss.fa -d 2 -t 0.9 
+        -start examples/example_3/chains/pairs/5nss_NG.pdb
 ```
 
 In this case, the result is quite good, but let's focus on the speed of the program. As the number of interactions grew, the time it takes for the program also increases. However, there are a few things to comment about it.
@@ -226,9 +252,9 @@ In this last example, let's talk about how the software behaves about the number
 ![6om3 builded from: a) rcsb.com b) promod with stoichiometry][6om3_composed]
 
 ```{sh, eval=F}
-python3 main.py -i examples/example_5/chains/pairs -o examples/example_5/results  \
-        -f examples/example_5/6om3.fa -d 0.3 -t 0.95 \
-        -s examples/example_5/stoic.csv
+promod -i examples/example_4/chains/pairs -o examples/example_4/results  \
+        -f examples/example_4/6om3.fa -d 0.3 -t 0.95 \
+        -s examples/example_4/stoic.csv
 ```
 
 In this last example, let's talk about how the software behaves about the number of input pdbs and stoichiometry related stuff.
@@ -247,7 +273,9 @@ An important thing about the stoichiometry is that is critical to make sure that
 
 3. Selecting different starting points can produce different models. It's difficult to say which is the most adequate starting point, as may vary according to the goal of the assembly.
 
-## About Promod
+4. The fasta file require to be specially prepared for this application: There should not be repeated sequences (with at least an alignment score equal or higher than threshold selected). This also applies for sequences with unknown aminoacids, as they are marked as X in the fasta file and therefore will mismatch with the sequence in the pdb. Those sequences are usually missing in the final model
+
+
 
 [3e0d_pure]: examples/example_1/imgs/3e0d_original.png
 [3e0d_fail]: examples/example_1/imgs/3e0d_fail.png
@@ -256,8 +284,8 @@ An important thing about the stoichiometry is that is critical to make sure that
 [3e0d_composed]: examples/example_1/imgs/3e0d_composed.png
 
 [6gmh_composed]: examples/example_2/imgs/6gmh-composed.png
-[6om3_composed]: examples/example_5/imgs/6om3-composed.png
+[6om3_composed]: examples/example_4/imgs/6om3-composed.png
 
-[5nss_pure]: examples/example_4/imgs/5nss-original.png
-[5nss_builded]: examples/example_4/imgs/5nss-builded.png
-[5nss_composed]: examples/example_4/imgs/5nss-composed.png
+[5nss_pure]: examples/example_3/imgs/5nss-original.png
+[5nss_builded]: examples/example_3/imgs/5nss-builded.png
+[5nss_composed]: examples/example_3/imgs/5nss-composed.png

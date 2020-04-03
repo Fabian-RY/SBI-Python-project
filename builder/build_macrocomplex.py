@@ -16,6 +16,10 @@ from Bio import PDB
 from Bio import pairwise2
 
 def _chain_id():
+    '''
+        The differents id the chains will have inside the model. Now supports a model up to 60 different ids:
+        25 for uppercase letters, 25 for lowercase letters and 10 more from numbers 0 to 9.
+    '''
     for i in range(65, 91, 1):
         yield chr(i)
     for i in range(97, 123, 1):
@@ -72,7 +76,9 @@ def build_complex(threshold, distance, stoichiometry, sequences, structures, ver
         This is the core function of the program. 
         
         Takes a list of structures and tries to join them in a single model, taking into account
-        diferent parameters, such as
+        diferent parameters, such as an intial model, a threshold for the pairwise alignments and 
+        the distance to consider that two chains are in the same position and it must be discarded 
+        (different atoms cannot occupy the same space)
     '''
     # Initiate empty structure and check some errors
     seqs = get_fastas_from_structs(structures, sequences)
@@ -84,13 +90,16 @@ def build_complex(threshold, distance, stoichiometry, sequences, structures, ver
     ids = _chain_id()
     iters = 0
     pair_num = len(structures)
+    # Prepare a dict that saves how many chains of every one in the stoichiometry has the model in construction
     if(stoichiometry):
         current_number_of_chains = {chain_id:0 for chain_id in set(stoichiometry)}
+    # We need at least 2 pdbs with an interaction. Can be the same one repeated. This is done to avoid trouble
     if(pair_num < 2):
-        raise ValueError('Needed at least 2 pairs to superpose')
+        raise ValueError('Needed at least 2 pdbs to superpose')
     failed = []
     current = 0
     done = []
+    
     
     # If an initial structure was given, introduce it into the model
     if(initial):
@@ -128,7 +137,9 @@ def build_complex(threshold, distance, stoichiometry, sequences, structures, ver
     if verbose: print('Starting to build')
     # The main loop of the function
     while True:
-        if verbose: print('Loop #%i' % current)
+        if verbose: 
+            print('Loop #%i' % current)
+            print('Current number of chains: %i' % len(list(full_structure.get_chains())))
         # All the structures where added correctly (should only be for non stoichiometric uses)
         if(not stoichiometry and len(done) == len(structures)): 
             break
@@ -141,7 +152,7 @@ def build_complex(threshold, distance, stoichiometry, sequences, structures, ver
         # Therefor, it will start an endless loop, as the structure remain equal no matter which 
         # of the left structures is trying to be added. We stop it here
         if 3 in count: # We are repeating structures
-            if verbose: print('Some pdbs could not be joined')
+            if verbose: print('Some pdbs could not be joined.\nAnd endless loop started and no more chains could be added\nFinishing the model in the current state')
             break
         if len(list(full_structure.get_chains())) == 0:
             if verbose: print('Initializing complex')
@@ -207,12 +218,13 @@ def build_complex(threshold, distance, stoichiometry, sequences, structures, ver
                             if len(close_atoms) > 0:
                                 clashes += 1
                 if (clashes < 10 and pair.rms < 0.05):
+                    # The chain can be added, so let's add it
                     for chain in atoms_of_chains:
-                        chain_id = next(ids)
-                        chain2 = PDB.Chain.Chain(chain_id)
+                        chain_id = next(ids) # Chosing an id
+                        chain2 = PDB.Chain.Chain(chain_id) # An empty chain which will add the residues to join
                         chain2.child_list += list(chain.get_residues())
                         model = next(full_structure.get_models())
-                        if(stoichiometry):
+                        if(stoichiometry): # Taking the stoichiometry into account
                             chain_sequence = _get_chain_sequence(chain)
                             for seq in sequences:
                                 alignment = pairwise2.align.globalxx(chain_sequence, seq.seq, one_alignment_only=True) 
